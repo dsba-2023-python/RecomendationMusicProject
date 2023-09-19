@@ -1,12 +1,20 @@
-# Recomendation Music Project
+# Music Recommendation Application
+## Introduction
+> **User story:**
+> As music fan, I want to find song, so I can listen it.
 
-## Tasks
+Dataset ([example](https://www.kaggle.com/datasets/josephinelsy/spotify-top-hit-playlist-2010-2022)) with spotify library
 
-1) Read file correctly
-2) Descriptive statistics using arparse:
-   * How many columns;
-   * Min / Max by column;
-   * Mean / std by column;
-   * ...
-3) Top 5 song by artist
-4) ...
+## Part 1 
+> **Job story:**
+> When the application is run, I want to know a summary info about primary dataset (such as quantity of songs or artists, date range etc.) so I can create a search query more accurately 
+
+### Requirements
+> [!IMPORTANT] 
+> Use only built-in python functions 
+
+1) Read dataset and store it in a appropriate data structure ✅;
+2) Write a function to get shape of dataset;
+3) Write a function which returns minimum and maximum value from a column;
+4) Using **argparse** tool to implement an application console call with positional and optional arguments;
+
