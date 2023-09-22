@@ -27,7 +27,7 @@ Dataset ([example](https://www.kaggle.com/datasets/josephinelsy/spotify-top-hit-
 #### Requirements
 1) Write a function which returns top-n songs by artist;
 2) Write a function which returns top-n songs for a genre;
-3) Write a function which returns top-n songs by year;
+3) Write a function which returns top-n songs by period;
 4) Write a function which returns the most top-n similar songs by sound to current (by link);
 
 ## Part 3
