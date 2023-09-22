@@ -4,6 +4,12 @@ import csv
 import pandas as pd
 
 
+TRACK_NAME_CL = 3
+TRACK_POP_CL = 4
+ARTIST_CL = 7
+
+
+
 def get_table_shape(table: List[List[object]]) -> Tuple[int, int]:
     return len(table) if table else 0, len(table[0]) if len(table) else 0
 
@@ -35,6 +41,41 @@ def preprocess_file(file_path: str) -> List[List[object]]:
     return df.values.tolist()
 
 
+def get_artist_with_most_songs(table):
+    artists = dict()
+
+    for row in table:
+        artists[row[ARTIST_CL]] = artists.get(row[ARTIST_CL], 0) + 1
+
+    max_pair = ("", 0)
+    for i in artists.items():
+        if i[1] > max_pair[1]:
+            max_pair = i
+
+    print(sorted(artists.items(), key=lambda pair: pair[1], reverse=True)[:5])
+
+    # artists = [row[ARTIST_CL] for row in table]
+    # artists.sort()
+    #
+    # last_artist = artists[0]
+    # last_artist_count = 1
+    #
+    # max_artist = artists[0]
+    # max_artist_count = 1
+    #
+    # for artist in artists:
+    #     if artist == last_artist:
+    #         last_artist_count += 1
+    #     else:
+    #         if max_artist_count <= last_artist_count:
+    #             max_artist = last_artist
+    #             max_artist_count = last_artist_count
+    #         last_artist = artist
+    #         last_artist_count = 1
+
+    return max_pair
+
+
 def get_top_artist_count(table, n=5):
     artist_column = 7
 
@@ -47,12 +88,22 @@ def get_top_artist_count(table, n=5):
 
     return artists
 
+def get_top_artist_tracks(table, artist:str, n=5):
+    songs = list()
+    for row in table:
+        if row[ARTIST_CL] == artist:
+            songs.append((row[TRACK_NAME_CL],row[TRACK_POP_CL]))
+
+    print(artist)
+    for i, song in enumerate(sorted(songs, key=lambda x: x[1], reverse=True)[:n]):
+        print(f"{i+1}) {song[0]}: {song[1]}")
 
 def test(table):
-    print(get_table_shape(table))
-    print(get_column_stat(table, 12, "max"))
-    print(get_top_artist_count(table))
-
+    # print(get_table_shape(table))
+    # print(get_column_stat(table, 12, "max"))
+    # print(get_top_artist_count(table))
+    # print(get_artist_with_most_songs(table))
+    get_top_artist_tracks(table, "Rihanna", 10)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Music Recommendation Application")
