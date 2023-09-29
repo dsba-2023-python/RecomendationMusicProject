@@ -2,6 +2,14 @@ import argparse
 from typing import List, Tuple
 import pandas as pd
 
+TRACK_COLUMN = 3
+POPULAR_TRAC_COLUMN = 4
+ARTIST_NAME_COLUMN = 7
+GENRE_COLUMN = 8
+YEAR_COLUMN = 1
+SONGE_ID_COLUMN = 2
+M = 9
+
 
 def get_table_shape(table: List[List[object]]) -> Tuple[int, int]:
     return len(table) if table else 0, len(table[0]) if len(table) else 0
@@ -41,10 +49,59 @@ def get_top_artist_count(table, n=5):
     return sorted(m.items(), key=lambda x: x[1], reverse=True)[:n]
 
 
+def top_n_songs_by_artist(table, artist, n):
+    table = list(filter(lambda x: artist == x[ARTIST_NAME_COLUMN], table))
+    table.sort(key=lambda x: x[POPULAR_TRAC_COLUMN], reverse=True)
+
+    return list(map(lambda x: (x[TRACK_COLUMN], x[POPULAR_TRAC_COLUMN]), table))[:n]
+
+
+def top_n_songs_by_years(table, year: int, n: int):
+    if isinstance(year, tuple):
+        year = sorted(year)
+        table = list(filter(lambda x: year[0] <= x[YEAR_COLUMN] <= year[-1], table))
+    else:
+        table = list(filter(lambda x: year == x[YEAR_COLUMN], table))
+    table.sort(key=lambda x: x[POPULAR_TRAC_COLUMN], reverse=True)
+
+    return list(map(lambda x: (x[TRACK_COLUMN], x[YEAR_COLUMN], x[ARTIST_NAME_COLUMN], x[POPULAR_TRAC_COLUMN]), table))[
+           :n]
+
+
+def top_n_songs_for_a_genre(table, genre, n):
+    def parse_list(stroka):
+        return stroka[2:-2].split("', '")
+
+    table = list(filter(lambda x: genre in parse_list(x[GENRE_COLUMN]), table))
+    table.sort(key=lambda x: x[POPULAR_TRAC_COLUMN], reverse=True)
+
+    return list(map(lambda x: (x[TRACK_COLUMN], x[ARTIST_NAME_COLUMN], x[POPULAR_TRAC_COLUMN]), table))[:n]
+
+
+def similar_songs(table, song_id, n):
+    smt = []
+
+    def evklid(lst1, lst2):
+        lst3 = zip(lst1, lst2)
+
+        return sum([(i[0] - i[1]) ** 2 for i in lst3]) ** (0.5)
+
+    for i in table:
+        if song_id == i[SONGE_ID_COLUMN]:
+            lst1 = i[M:]
+            break
+    for i in table:
+        if song_id != i[SONGE_ID_COLUMN]:
+            lst2 = i[M:]
+            smt.append((evklid(lst1, lst2), i))
+    return sorted(smt)[:n]
+
+
 def test(table):
-    print(get_table_shape(table))
-    print(get_column_stat(table, 12, "max"))
-    print(get_top_artist_count(table))
+    print(similar_songs(table, "7iXF2W9vKmDoGAhlHdpyIa", 5))
+    # print(get_table_shape(table))
+    # print(get_column_stat(table, 12, "max"))
+    # print(get_top_artist_count(table))
 
 
 if __name__ == "__main__":
@@ -59,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--top_artists", type=int)
 
     # running not in console
-    args = parser.parse_args(["./data/playlist_2010to2022.csv", '-t', '7'])
+    args = parser.parse_args(["./data/playlist_2010to2022.csv"])
 
     # running in console
     # args = parser.parse_args()
@@ -77,11 +134,11 @@ if __name__ == "__main__":
     if args.top_artists:
         n = get_top_artist_count(db, args.top_artists)
         for i, p in enumerate(n):
-            print(f'{i+1}) {p[0]}: {p[1]}')
+            print(f'{i + 1}) {p[0]}: {p[1]}')
 
     if args.column_index:
         print(
             f"{args.stats} is {get_column_stat(db, args.column_index, args.stats)} for {args.column_index} column!"
         )
 
-   # test(db)
+test(db)
