@@ -35,10 +35,9 @@ Dataset ([example](https://www.kaggle.com/datasets/josephinelsy/spotify-top-hit-
 #### Requirements
 1) Write a function which returns top-n songs by artist;
 2) Write a function which returns top-n songs for a genre;
-3) Write a function which returns top-n songs by years range;
-4) Write a function which returns the most top-n similar songs by sound (13 track's audio features) to current (by link).
+3) Write a function which returns top-n songs by period;
+4) Write a function which returns the most top-n similar songs by sound to current (by link);
 
-(4*) Consider Euclidean distance and cosine similarity approaches.
 
 > #### Topics:
 > 
