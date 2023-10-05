@@ -2,11 +2,10 @@ import argparse
 from typing import List, Tuple
 import pandas as pd
 
-
+TRACK_ID_CL = 2
 TRACK_NAME_CL = 3
 TRACK_POP_CL = 4
 ARTIST_CL = 7
-
 
 
 def get_table_shape(table: List[List[object]]) -> Tuple[int, int]:
@@ -81,22 +80,110 @@ def get_top_artist_count(table, n=5):
         m[i[7]] = m.get(i[7], 0) + 1
     return sorted(m.items(), key=lambda x: x[1], reverse=True)[:n]
 
-def get_top_artist_tracks(table, artist:str, n=5):
+
+def get_top_artist_tracks(table, artist: str, n=5):
     songs = list()
     for row in table:
         if row[ARTIST_CL] == artist:
-            songs.append((row[TRACK_NAME_CL],row[TRACK_POP_CL]))
+            songs.append((row[TRACK_NAME_CL], row[TRACK_POP_CL]))
 
     print(artist)
     for i, song in enumerate(sorted(songs, key=lambda x: x[1], reverse=True)[:n]):
         print(f"{i+1}) {song[0]}: {song[1]}")
+
+
+def euclidean_distance(vector_1, vector_2):
+    result = 0
+    for i in range(len(vector_1)):
+        result += (vector_1[i] - vector_2[i]) ** 2
+
+    return result**0.5
+
+
+def get_top_songs_by_sound(table, song_id, n=5):
+    base_song_idx = 0
+    for i, row in enumerate(table):
+        if song_id == row[TRACK_ID_CL]:
+            base_song = row[-13:]
+            base_song_idx = i
+            break
+
+    distances = []
+    for i, row in enumerate(table):
+        if i == base_song_idx:
+            continue
+        current = row[-13:]
+        distance = euclidean_distance(base_song, current)
+        distances.append((distance, i))
+
+    distances.sort()
+
+    return [
+        (table[i[1]][TRACK_NAME_CL], table[i[1]][ARTIST_CL], i[0])
+        for i in distances[:n]
+    ]
+
+def hamming_distance(left_str, right_str):
+    dist = 0
+
+    if len(left_str) > len(right_str):
+        left_str, right_str = right_str, left_str
+
+    left_str += (len(right_str) - len(left_str)) * "й"
+
+    for i in range(len(right_str)):
+        if right_str[i] != left_str[i]:
+            dist += 1
+
+    return dist
+
+def jaccard_index(left_str, right_str):
+
+    sim = 0
+    lset, rset = set(left_str.split()), set(right_str.split())
+    print(lset,rset,lset & rset,lset | rset - lset & rset)
+
+    return len(lset & rset) / (len(lset | rset - lset & rset))
+
+
+def find_similar_song_name(table, query):
+    words = query.lower().split()
+    hd_list = list()
+    jc_list = list()
+    for i, row in enumerate(table):
+        hd = hamming_distance(query.lower(), row[TRACK_NAME_CL].lower())
+        hd_list.append((hd, i))
+        jc = jaccard_index(query.lower(), row[TRACK_NAME_CL].lower())
+        jc_list.append(jc)
+
+        row_split = row[TRACK_NAME_CL].lower().split()
+
+        if all(x in row_split for x in words):
+            print(row[TRACK_NAME_CL])
+
+    print("\n\n----HAMMMING----\n\n")
+    hd_list.sort()
+
+    for i, x in hd_list[:5]:
+        print(table[x][TRACK_NAME_CL])
+
+    print("\n\n----JACCARD----\n\n")
+    jc_list.sort(reverse=True)
+    for i, x in jc_list[:5]:
+        print(table[x][TRACK_NAME_CL])
+        # TODO: fix
+
+
 
 def test(table):
     # print(get_table_shape(table))
     # print(get_column_stat(table, 12, "max"))
     # print(get_top_artist_count(table))
     # print(get_artist_with_most_songs(table))
-    get_top_artist_tracks(table, "Rihanna", 10)
+    # get_top_artist_tracks(table, "Rihanna", 10)
+    # print(*get_top_songs_by_sound(table, "0wwPcA6wtMf6HUMpIRdeP7", 10), sep="\n")
+    (find_similar_song_name(table, "in me"))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Music Recommendation Application")
@@ -110,7 +197,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--top_artists", type=int)
 
     # running not in console
-    args = parser.parse_args(["./data/playlist_2010to2022.csv", '-t', '7'])
+    args = parser.parse_args(["./data/playlist_2010to2022.csv"])
 
     # running in console
     # args = parser.parse_args()
@@ -128,11 +215,11 @@ if __name__ == "__main__":
     if args.top_artists:
         n = get_top_artist_count(db, args.top_artists)
         for i, p in enumerate(n):
-            print(f'{i+1}) {p[0]}: {p[1]}')
+            print(f"{i+1}) {p[0]}: {p[1]}")
 
     if args.column_index:
         print(
             f"{args.stats} is {get_column_stat(db, args.column_index, args.stats)} for {args.column_index} column!"
         )
 
-   # test(db)
+test(db)
