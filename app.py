@@ -16,6 +16,8 @@ URL_CL = 0
 _DISTS = Literal["E_dist", "cos_dist", "E_dist_w_L1"]
 
 
+
+
 def get_table_shape(table: List[List[object]]) -> Tuple[int, int]:
     return len(table) if table else 0, len(table[0]) if len(table) else 0
 
@@ -141,14 +143,33 @@ def get_top_similar_songs(table, url, func: _DISTS = "E_dist", n=5):
 
     return sorted(similar_songs, key=lambda x: x["dist"])[:n] 
 
+
+def find_similar(table, query):
+    query = query.lower().split()
+    jaccard_ind = []
+    for i, row in enumerate(table):
+        row_lower = row[TRACK_NAME_CL].lower().split()
+        if all([word in row_lower for word in query]):
+            print(row[TRACK_NAME_CL])
+        jaccard_ind.append((similar_Jaccard_index(query, row_lower), i))
+    jaccard_ind.sort(reverse = True)
+    for i in jaccard_ind[:5]:
+        print(table[i[1]][TRACK_NAME_CL])
+
+
+def similar_Jaccard_index(left, right):
+    left, right = set(left), set(right)
+    return len(left & right) / (len(left) + len(right) - len(left & right))
+
+
 def test(table):
     # print(get_table_shape(table))
     # print(get_column_stat(table, 12, "max"))
     # print(get_top_artist_count(table))
-    print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="E_dist",n=3))
-    print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="cos_dist",n=3))
-    print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="aboba",n=3))
-
+    # print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="E_dist",n=3))
+    # print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="cos_dist",n=3))
+    # print(get_top_similar_songs(table, "https://open.spotify.com/playlist/2fmTTbBkXi8pewbUvG3CeZ", func="aboba",n=3))
+    find_similar(table, 'you and me')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Music Recommendation Application")
