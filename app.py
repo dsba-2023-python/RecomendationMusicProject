@@ -143,7 +143,7 @@ def jaccard_index(left_str, right_str):
     lset, rset = set(left_str.split()), set(right_str.split())
     print(lset,rset,lset & rset,lset | rset - lset & rset)
 
-    return len(lset & rset) / (len(lset | rset - lset & rset))
+    return len(lset & rset) / (len(lset) + len(rset) - len(lset & rset))
 
 
 def find_similar_song_name(table, query):
@@ -154,7 +154,7 @@ def find_similar_song_name(table, query):
         hd = hamming_distance(query.lower(), row[TRACK_NAME_CL].lower())
         hd_list.append((hd, i))
         jc = jaccard_index(query.lower(), row[TRACK_NAME_CL].lower())
-        jc_list.append(jc)
+        jc_list.append((jc,i))
 
         row_split = row[TRACK_NAME_CL].lower().split()
 
