@@ -3,11 +3,10 @@ from typing import List, Tuple
 import csv
 import pandas as pd
 
-
 TRACK_NAME_CL = 3
 TRACK_POP_CL = 4
 ARTIST_CL = 7
-
+TRACK_ID_CL = 2
 
 
 def get_table_shape(table: List[List[object]]) -> Tuple[int, int]:
@@ -88,22 +87,71 @@ def get_top_artist_count(table, n=5):
 
     return artists
 
-def get_top_artist_tracks(table, artist:str, n=5):
+
+def get_top_artist_tracks(table, artist: str, n=5):
     songs = list()
     for row in table:
         if row[ARTIST_CL] == artist:
-            songs.append((row[TRACK_NAME_CL],row[TRACK_POP_CL]))
+            songs.append((row[TRACK_NAME_CL], row[TRACK_POP_CL]))
 
     print(artist)
     for i, song in enumerate(sorted(songs, key=lambda x: x[1], reverse=True)[:n]):
-        print(f"{i+1}) {song[0]}: {song[1]}")
+        print(f"{i + 1}) {song[0]}: {song[1]}")
+
+
+def euclidean_distance(left, right):
+    distance = 0
+
+    for i in range(len(left)):
+        distance += (left[i] - right[i]) ** 2
+
+    return distance ** 0.5
+
+
+def cosine_similarity(left, right):
+    numerator = 0
+    denominator_left = 1
+    denominator_right = 1
+    for i in range(len(left)):
+        numerator += left[i] * right[i]
+        denominator_left += left[i] ** 2
+        denominator_right += right[i] ** 2
+
+    return numerator / (denominator_left * denominator_right) ** 0.5
+
+
+def get_similar_songs(table, song_id, n=10, is_cosine=False):
+    target_id = 0
+    for i, row in enumerate(table):
+        if row[TRACK_ID_CL] == song_id:
+            target_id = i
+            break
+
+    distance_list = []
+    for i, row in enumerate(table):
+        if i == target_id:
+            continue
+        if not is_cosine:
+            distance = euclidean_distance(table[target_id][-13:], row[-13:])
+        else:
+            distance = cosine_similarity(table[target_id][-13:], row[-13:])
+        distance_list.append((distance, i))
+
+    distance_list.sort(reverse=True if is_cosine else False)
+
+    return [(table[i][ARTIST_CL], table[i][TRACK_NAME_CL]) for x, i in distance_list[:n]]
+
 
 def test(table):
     # print(get_table_shape(table))
     # print(get_column_stat(table, 12, "max"))
     # print(get_top_artist_count(table))
     # print(get_artist_with_most_songs(table))
-    get_top_artist_tracks(table, "Rihanna", 10)
+    # get_top_artist_tracks(table, "Rihanna", 10)
+    print(*get_similar_songs(table, "0wwPcA6wtMf6HUMpIRdeP7", is_cosine=False), sep="\n")
+    print("-" * 79)
+    print(*get_similar_songs(table, "0wwPcA6wtMf6HUMpIRdeP7", is_cosine=True), sep="\n")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Music Recommendation Application")
