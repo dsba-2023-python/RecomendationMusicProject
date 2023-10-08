@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import random
+import re
 
 
 def parse_bio_short(soup):
@@ -11,7 +12,6 @@ def parse_bio_short(soup):
 
 
 def parse_bio_long(soup):
-
     content = soup.find("div", {"class": "wiki-content"})
     if not content:
         return 'Artist does not exist'
@@ -43,6 +43,7 @@ def top_n_songs(artist, n=5):
         resp.append((name, number))
     return resp
 
+
 def similar_artists(artist, n=5):
     playlist = []
 
@@ -59,11 +60,41 @@ def similar_artists(artist, n=5):
     random.shuffle(playlist)
     return playlist
 
-def get_lyrics():
-    link = "https://genius.com/Dj-khaled-wild-thoughts-lyrics"
-    res = requests.get(link).content
+
+def get_lyrics(artist, song_name):
+    result = []
+
+    if artist.count(' ') > 0:
+        artist = artist.split(' ')
+        artist[0] = artist[0].capitalize()
+        artist_name = '-'.join(artist)
+    else:
+        artist_name = artist.capitalize()
+
+    if song_name.count(' ') > 0:
+        song_name = song_name.split(' ')
+        song_title = '-'.join(song_name)
+    else:
+        song_title = song_name
+
+    # pattern = "\"Lyrics__Container-\S*\s\""
+
+    link = f"https://genius.com/{artist_name}-{song_title}-lyrics"
+    res = str(requests.get(link).content).replace('<br/>', '\n')
     soup = BeautifulSoup(res, "html.parser")
-    return soup
+    parts = soup.findAll("div", {"class": "Lyrics__Container-sc-1ynbvzw-1"})
+    # parts = soup.findAll("div", {"class": re.match(pattern, res)})
+
+    for part in parts:
+        strings = part.text.split('\n')
+        for string in strings:
+            if string != "":
+                result.append(string)
+
+    final_text = '\n'.join(result)
+
+    return final_text.replace('\\xe2\\x80\\x85', " ").replace('\\xe2\\x80\\x94', " ")
+
 
 if __name__ == "__main__":
-    print(get_lyrics())
+    print(get_lyrics("the weeknd", "heartless"))
