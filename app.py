@@ -123,6 +123,7 @@ def get_top_songs_by_sound(table, song_id, n=5):
         for i in distances[:n]
     ]
 
+
 def hamming_distance(left_str, right_str):
     dist = 0
 
@@ -137,11 +138,12 @@ def hamming_distance(left_str, right_str):
 
     return dist
 
+
 def jaccard_index(left_str, right_str):
 
     sim = 0
     lset, rset = set(left_str.split()), set(right_str.split())
-    print(lset,rset,lset & rset,lset | rset - lset & rset)
+    print(lset, rset, lset & rset, lset | rset - lset & rset)
 
     return len(lset & rset) / (len(lset) + len(rset) - len(lset & rset))
 
@@ -154,7 +156,7 @@ def find_similar_song_name(table, query):
         hd = hamming_distance(query.lower(), row[TRACK_NAME_CL].lower())
         hd_list.append((hd, i))
         jc = jaccard_index(query.lower(), row[TRACK_NAME_CL].lower())
-        jc_list.append((jc,i))
+        jc_list.append((jc, i))
 
         row_split = row[TRACK_NAME_CL].lower().split()
 
@@ -172,7 +174,6 @@ def find_similar_song_name(table, query):
     for i, x in jc_list[:5]:
         print(table[x][TRACK_NAME_CL])
         # TODO: fix
-
 
 
 def test(table):
