@@ -3,8 +3,9 @@ from lastfm import parse_bio
 from tqdm import tqdm
 import pickle
 import re
-import string
 from app import cos_dist, E_dist
+from typing import List
+
 
 def fetch_bio():
     bios = []
@@ -13,6 +14,7 @@ def fetch_bio():
         bios.append(parse_bio(name, False))
     with open('data.pickle', 'wb') as f:
         pickle.dump(bios, f, pickle.HIGHEST_PROTOCOL)
+
 
 def get_bio():
     with open('data.pickle', 'rb') as f:
@@ -29,7 +31,7 @@ def preprocess(row) -> list:
     return row
 
 
-def get_dictionary(data) -> dict:
+def get_dictionary(data) -> List[list]:
     words_met = dict()
     idx = 0
     for row in tqdm(data):
@@ -56,8 +58,5 @@ def compare_bio(matrix):
             print(i, j, E_dist(vector1, vector2))
 
 
-
-
 if __name__ == "__main__":
     print(compare_bio(get_dictionary(get_bio())))
-
