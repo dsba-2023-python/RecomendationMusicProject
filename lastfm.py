@@ -60,7 +60,7 @@ def parse_genius(artist, song):
     # all_spans=text.find_all("span")#ReferentFragmentdesktop__Highlight-sc-110r0d9-1
     final_text = "\n\n".join([span.text.strip() for span in text])
 
-    print(final_text)
+    return final_text
 
 
 if __name__ == "__main__":
